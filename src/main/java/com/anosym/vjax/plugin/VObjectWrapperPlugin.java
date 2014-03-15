@@ -30,8 +30,8 @@ public class VObjectWrapperPlugin extends AbstractMojo {
 
   /**
    * Fully qualified name of the source directory for the generated sources. There is no default.
-   * The final name will have main/java appended based on maven source dir structure and the value
-   * of {@link #mavenSourceDir}
+   * The final name will have generated-sourcs/vjax-wrapper appended based on maven source dir structure and the value
+   * of {@link #sourceDirType}
    */
   @Parameter(required = true)
   private File sourceDir;
