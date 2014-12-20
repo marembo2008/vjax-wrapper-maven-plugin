@@ -18,8 +18,6 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
-import static java.lang.String.format;
-
 /**
  *
  * @author marembo
@@ -38,11 +36,6 @@ public class VObjectWrapperPlugin extends AbstractMojo {
     private File sourceDir;
     @Parameter(property = "project.runtimeClasspathElements", required = true, readonly = true)
     private List<String> classpath;
-    /**
-     * Options include main, test, generated-sources or any other user specified directory.
-     */
-    @Parameter(defaultValue = "generated-sources")
-    private String sourceDirType;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
@@ -51,11 +44,10 @@ public class VObjectWrapperPlugin extends AbstractMojo {
         }
         try {
             init();
-            final File path = new File(sourceDir, format("%s/vjax-wrapper", sourceDirType));
 
-            LOG.log(Level.INFO, "Generate sources directory....{0}", path.getAbsolutePath());
+            LOG.log(Level.INFO, "Generate sources directory....{0}", sourceDir.getAbsolutePath());
 
-            final VObjectWrapper vow = new VObjectWrapper(path.getAbsolutePath());
+            final VObjectWrapper vow = new VObjectWrapper(sourceDir.getAbsolutePath());
             vow.process();
         } catch (Exception ex) {
             throw new MojoExecutionException("Error generating sources", ex);
