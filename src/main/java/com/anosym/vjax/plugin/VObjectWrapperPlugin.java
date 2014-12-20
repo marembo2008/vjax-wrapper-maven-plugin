@@ -1,13 +1,15 @@
 package com.anosym.vjax.plugin;
 
 import com.anosym.vjax.v3.wrapper.VObjectWrapper;
+import com.google.common.collect.Sets;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
@@ -16,12 +18,16 @@ import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.plugins.annotations.ResolutionScope;
 
+import static java.lang.String.format;
+
 /**
  *
  * @author marembo
  */
 @Mojo(name = "vjax", defaultPhase = LifecyclePhase.PACKAGE, requiresDependencyResolution = ResolutionScope.COMPILE_PLUS_RUNTIME)
 public class VObjectWrapperPlugin extends AbstractMojo {
+
+    private static final Logger LOG = Logger.getLogger(VObjectWrapperPlugin.class.getName());
 
     /**
      * Fully qualified name of the source directory for the generated sources. There is no default.
@@ -38,15 +44,18 @@ public class VObjectWrapperPlugin extends AbstractMojo {
     @Parameter(defaultValue = "generated-sources")
     private String sourceDirType;
 
+    @Override
     public void execute() throws MojoExecutionException, MojoFailureException {
         if (sourceDir == null) {
             throw new MojoFailureException("Source Dir is required");
         }
         try {
             init();
-            File path = new File(sourceDir, sourceDirType + "/vjax-wrapper");
-            System.out.println("Generate sources directory...." + path.getAbsolutePath());
-            VObjectWrapper vow = new VObjectWrapper(path.getAbsolutePath());
+            final File path = new File(sourceDir, format("%s/vjax-wrapper", sourceDirType));
+
+            LOG.log(Level.INFO, "Generate sources directory....{0}", path.getAbsolutePath());
+
+            final VObjectWrapper vow = new VObjectWrapper(path.getAbsolutePath());
             vow.process();
         } catch (Exception ex) {
             throw new MojoExecutionException("Error generating sources", ex);
@@ -55,11 +64,11 @@ public class VObjectWrapperPlugin extends AbstractMojo {
 
     private void init() {
         try {
-            Set<URL> urls = new HashSet<URL>();
-            for (String element : classpath) {
+            final Set<URL> urls = Sets.newHashSet();
+            for (final String element : classpath) {
                 urls.add(new File(element).toURI().toURL());
             }
-            ClassLoader contextClassLoader = URLClassLoader.newInstance(
+            final ClassLoader contextClassLoader = URLClassLoader.newInstance(
                     urls.toArray(new URL[0]),
                     Thread.currentThread().getContextClassLoader());
             Thread.currentThread().setContextClassLoader(contextClassLoader);
